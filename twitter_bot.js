@@ -1,8 +1,9 @@
-var unirest = require('unirest')
-var dotenv = require('dotenv')
-var uuidv4 = require('uuid').v4
-dotenv.config()
+import unirest from 'unirest'
+import dotenv from 'dotenv'
+import uuid from 'uuid'
 
+var uuidv4 = uuid.v4
+dotenv.config()
 
 
 
@@ -23,7 +24,7 @@ try {
 
 var response = await unirest
   .get('https://api.twitter.com/2/users/1522578633365282816/mentions')
-  .headers({Authorization:'Bearer AAAAAAAAAAAAAAAAAAAAACK%2BcQEAAAAA67uWLUM%2BO51yjHhk%2FdNcFKUbLCc%3DSbm3m8SrmQoCkRM7p8APtG8A6JdfntBVH9HdfAoMx7Ubw39iSb'})
+  .headers({Authorization:`Bearer ${process.env.bearer}`})
   console.log('obtain_data_from_twitter')
    return response.body
 }catch(error){
@@ -55,8 +56,8 @@ return mention_objects
 
 var req = unirest('POST', 'https://api.twitter.com/2/tweets')
   .headers({
-    'Authorization': 'OAuth oauth_consumer_key="10X8ffBoZEe99t3eEBoYfnFaJ",oauth_token="1522578633365282816-CzmbyZ5snIy6PIeXWDIRsKbZJOyyuZ",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1652429498",oauth_nonce="2P7CpidO2bL",oauth_version="1.0",oauth_signature="Wh1hcMuRgStQuVcm3L8A2eYtzQA%3D"',
-   'Content-Type': 'application/json',
+    'Authorization': `OAuth oauth_consumer_key=${process.env.oauth_consumer_key},oauth_token=${process.env.oauth_token},oauth_signature_method="HMAC-SHA1",oauth_timestamp="1652429498",oauth_nonce="2P7CpidO2bL",oauth_version="1.0",oauth_signature="Wh1hcMuRgStQuVcm3L8A2eYtzQA%3D"`,
+    'Content-Type': 'application/json',
     'Cookie': 'guest_id=v1%3A165226499107585946; guest_id_ads=v1%3A165226499107585946; guest_id_marketing=v1%3A165226499107585946; personalization_id="v1_nP77W+yc1x1PvkjDSdgp7A=="'
 
   })
@@ -68,7 +69,7 @@ var req = unirest('POST', 'https://api.twitter.com/2/tweets')
   }))
   .end(function (res) { 
     console.log(res.raw_body);
-  });
+  });             
 
 
 }
@@ -128,9 +129,9 @@ var arr_of_keywords = ['accessories', 'bags',
 'women']
 // console.log('ARRR')
 // console.log(arr)
-for(i=0;i<arr.length;i++){
+for(var i=0;i<arr.length;i++){
 
-	for (y=0;y<arr_of_keywords.length;y++){
+	for (var y=0;y<arr_of_keywords.length;y++){
 
 		if(arr[i].text.search(arr_of_keywords[y]) != -1){
 
@@ -158,9 +159,9 @@ async function main(){
 
   try{
 
-  mentions = await obtain_data_from_twitter()
+  var mentions = await obtain_data_from_twitter()
 
-  restructured_data = obtain_message_from_twitter_data(mentions)
+  var restructured_data = obtain_message_from_twitter_data(mentions)
 
   analyze_tweet_message(restructured_data)
 
