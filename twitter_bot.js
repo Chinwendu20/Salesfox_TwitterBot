@@ -1,58 +1,100 @@
 import unirest from 'unirest'
 import dotenv from 'dotenv'
 import uuid from 'uuid'
-
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb'
 var uuidv4 = uuid.v4
 dotenv.config()
 
-
-
-
-
 var domain = process.env.domain
+
+var collection;
+
+var arr_of_keywords = ['accessories', 'bags',
+'beauty',
+'house',
+'jewelry',
+'kids',
+'men',
+'shoes',
+'women']
 
 var link = `${domain}/in/`
 
 var unique_id = uuidv4().slice(0,8)
 
+const uri = `mongodb+srv://salesfox:${process.env.mongodb_password}@cluster0.ucvcq.mongodb.net/?retryWrites=true&w=majority`;
+
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+
 
 async function obtain_data_from_twitter(){
-
-
-
 try {
 
 var response = await unirest
   .get('https://api.twitter.com/2/users/1522578633365282816/mentions')
   .headers({Authorization:`Bearer ${process.env.bearer}`})
-  console.log('obtain_data_from_twitter')
-   return response.body
+
+
+console.log('Here is response body')
+
+console.log(response.body)
+
+return response.body
 }catch(error){
 
-	return error
-}	 
+  return error
+}  
 
-	  }
-
-
-
-function obtain_message_from_twitter_data(raw_data){
-
-var mention_objects = raw_data['data']
-
-console.log('obtain_message_from_twitter_data')
-
-return mention_objects
-
-	}
+}
 
 
+async function filter_out_data(data){
+
+try{
+
+  var reverse_data =data['data'].reverse()
+
+  var test = await collection.find({}).toArray()
+
+  var latest_id = test[test.length-1].id
+
+  console.log('test')
+
+  console.log(test)
+
+  for (var i=reverse_data.length-1;i>=0;i--){
+
+      if(reverse_data[i].id==latest_id){
+
+        var result=reverse_data.slice(i+1)
+      }
+    }
+
+  console.log('Here is result i')
+
+  console.log(result)
+
+if (result==undefined){
+
+  var result=data['data']
+}
+console.log('here is result ii')
+console.log(result)
+return result
+}catch(error){
+
+  return error
+}
+
+}
 
 
-  async function reply_tweet(link, id){
+async function reply_tweet(link, id){
 
 
-var req = unirest('POST', 'https://api.twitter.com/2/tweets')
+var req = await unirest('POST', 'https://api.twitter.com/2/tweets')
    .headers({
     'Authorization': `OAuth oauth_consumer_key=${process.env.oauth_consumer_key},oauth_token=${process.env.oauth_token},oauth_signature_method="HMAC-SHA1",oauth_timestamp="1652952836",oauth_nonce="dev37bp4GPL",oauth_version="1.0",oauth_signature="qNiRX3N5kDaaa4BiPNn74%2BepzEM%3D"`,
     'Content-Type': 'application/json',
@@ -76,8 +118,6 @@ var req = unirest('POST', 'https://api.twitter.com/2/tweets')
 
 function matching_tweets_with_reply(keyword, id){
 
-  console.log('Switchingggg')
-  console.log(keyword)
 
 switch (keyword) {
   case 'accesssories':
@@ -99,7 +139,6 @@ switch (keyword) {
     reply_tweet(link+'kids', id)
     break;
   case 'men':
-    console.log('sending message')
     reply_tweet(link+'men', id)
     break;
    case 'shoes':
@@ -113,31 +152,18 @@ switch (keyword) {
 
 }
 
-
-
 function analyze_tweet_message(arr){
 
-var arr_of_keywords = ['accessories', 'bags',
-'beauty',
-'house',
-'jewelry',
-'kids',
-'men',
-'shoes',
-'women']
-// console.log('ARRR')
-// console.log(arr)
+
 for(var i=0;i<arr.length;i++){
 
-	for (var y=0;y<arr_of_keywords.length;y++){
+  for (var y=0;y<arr_of_keywords.length;y++){
 
-		if(arr[i].text.search(arr_of_keywords[y]) != -1){
+    if(arr[i].text.search(arr_of_keywords[y]) != -1){
 
-      console.log(arr_of_keywords[y])
-
-			matching_tweets_with_reply(arr_of_keywords[y], arr[i].id)
-		}
-	}
+      matching_tweets_with_reply(arr_of_keywords[y], arr[i].id)
+    }
+  }
 
 }
 
@@ -146,29 +172,72 @@ for(var i=0;i<arr.length;i++){
 
 
 
+async function main() {
 
 
+await client.connect()
+collection = client.db("test").collection("devices")
 
+// var result = await collection.createIndex( {id : 1},{unique : true} )
 
+// return result
 
+// // var test = await collection.deleteOne({_id: ObjectId("62866d6f49b59dc852876cd5")})
 
+// // console.log(test)
 
-async function main(){
+// var testt = await collection.find({}).toArray()
 
-  try{
+// console.log(testt)
 
-  var mentions = await obtain_data_from_twitter()
+var data_from_twitter = await obtain_data_from_twitter()
 
-  var restructured_data = obtain_message_from_twitter_data(mentions)
+var data_not_in_DB = await filter_out_data(data_from_twitter)
 
-  analyze_tweet_message(restructured_data)
+console.log('Here is the data')
 
-}catch(error){
+console.log(data_not_in_DB)
 
-  console.log(error)
+if (data_not_in_DB.length == 0){
+
+  return 'No new data'
+
 }
 
 
+await collection.insertMany(data_not_in_DB)
+
+analyze_tweet_message(data_not_in_DB)
+
+return 'All done'
+
 }
+
 
 main()
+  .then(console.log)
+  .catch(console.error)
+  .finally(() => client.close());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
