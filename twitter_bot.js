@@ -18,7 +18,7 @@ var arr_of_keywords = ['accessories', 'bags',
 'shoes',
 'women']
 
-var link = `${domain}/in/`
+var link = `${domain}`
 
 var unique_id = uuidv4().slice(0,8)
 
