@@ -37,9 +37,6 @@ var response = await unirest
   .headers({Authorization:`Bearer ${process.env.bearer}`})
 
 
-console.log('Here is response body')
-
-console.log(response.body)
 
 return response.body
 }catch(error){
@@ -60,9 +57,6 @@ try{
 
   var latest_id = test[test.length-1].id
 
-  console.log('test')
-
-  console.log(test)
 
   for (var i=reverse_data.length-1;i>=0;i--){
 
@@ -72,16 +66,11 @@ try{
       }
     }
 
-  console.log('Here is result i')
-
-  console.log(result)
-
 if (result==undefined){
 
   var result=data['data']
 }
-console.log('here is result ii')
-console.log(result)
+
 return result
 }catch(error){
 
@@ -178,25 +167,10 @@ async function main() {
 await client.connect()
 collection = client.db("test").collection("devices")
 
-// var result = await collection.createIndex( {id : 1},{unique : true} )
-
-// return result
-
-// // var test = await collection.deleteOne({_id: ObjectId("62866d6f49b59dc852876cd5")})
-
-// // console.log(test)
-
-// var testt = await collection.find({}).toArray()
-
-// console.log(testt)
-
 var data_from_twitter = await obtain_data_from_twitter()
 
 var data_not_in_DB = await filter_out_data(data_from_twitter)
 
-console.log('Here is the data')
-
-console.log(data_not_in_DB)
 
 if (data_not_in_DB.length == 0){
 
