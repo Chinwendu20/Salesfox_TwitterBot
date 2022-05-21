@@ -84,8 +84,8 @@ async function reply_tweet(link, id){
 
 
 var req = await unirest('POST', 'https://api.twitter.com/2/tweets')
-   .headers({
-    'Authorization': `OAuth oauth_consumer_key=${process.env.oauth_consumer_key},oauth_token=${process.env.oauth_token},oauth_signature_method="HMAC-SHA1",oauth_timestamp="1652952836",oauth_nonce="dev37bp4GPL",oauth_version="1.0",oauth_signature="qNiRX3N5kDaaa4BiPNn74%2BepzEM%3D"`,
+  .headers({
+    'Authorization': 'OAuth oauth_consumer_key="5TGsIaUOi5YJVYtGKttu7J7ub",oauth_token="1522578633365282816-4HQZRybjB1S6fyOsDmXmpmnUUs7b3F",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1653134134",oauth_nonce="v59KG6TfuXd",oauth_version="1.0",oauth_signature="eabxL%2BmYyxzBgXYr7pCNBi8dChs%3D"',
     'Content-Type': 'application/json',
     'Cookie': 'guest_id=v1%3A165226499107585946; guest_id_ads=v1%3A165226499107585946; guest_id_marketing=v1%3A165226499107585946; personalization_id="v1_nP77W+yc1x1PvkjDSdgp7A=="'
   })
